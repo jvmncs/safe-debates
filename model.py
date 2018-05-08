@@ -1,44 +1,7 @@
 import torch.nn as nn
-import torch.nn.functional as F
 
-class Softmax(nn.Module):
-    """Simple linear classifier using cross entropy loss"""
-    def __init__(self):
-        super().__init__()
-        self.logits = nn.Linear(784, 10)
 
-    def forward(self, x):
-        """
-        Define a forward pass through the network.
-        
-        Note: Since we're inheriting from nn.Module, this will take care of the backward
-        pass and parameter update step when we use an optimizer from `torch.optim`.
-        """
-        return self.logits(x)
-
-class TwoLayer(nn.Module):
-    """Feedforward neural network with one hidden layer"""
-    def __init__(self, hidden=800, dropout=.4):
-        super().__init__()
-        self.hidden = nn.Linear(784, hidden)
-        self.out = nn.Linear(hidden, 10)
-        self.dropout = nn.Dropout(dropout) if dropout else None
-
-    def forward(self, x):
-        """
-        Define a forward pass through the network.
-        
-        Note: Since we're inheriting from nn.Module, this will take care of the backward
-        pass and parameter update step when we use an optimizer from `torch.optim`.
-        """
-        if self.dropout:
-            x = self.dropout(x)
-        x = nn.functional.relu(self.hidden(x))
-        if self.dropout:
-            x = self.dropout(x)
-        return self.out(x)
-
-class ConvNet(nn.Module):
+class Judge(nn.Module):
     """
     ConvNet from TensorFlow CNN MNIST tutorial
     (see: https://www.tensorflow.org/tutorials/layers#building_the_cnn_mnist_classifier)
