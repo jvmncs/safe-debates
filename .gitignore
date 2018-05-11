@@ -1,2 +1,4 @@
 dev/
 data/
+checkpoint/
+*__pycache__*

@@ -6,11 +6,11 @@ class Judge(nn.Module):
     ConvNet from TensorFlow CNN MNIST tutorial
     (see: https://www.tensorflow.org/tutorials/layers#building_the_cnn_mnist_classifier)
 
-    Reproduced, not optmized.
+    Reproduced, not optimized.  Only change is number of channels in input.
     """
     def __init__(self):
         super().__init__()
-        self.block1 = self.conv_block(1, 32)
+        self.block1 = self.conv_block(2, 32)
         self.block2 = self.conv_block(32, 64)
         self.hidden = nn.Linear(4 * 4 * 64, 1024)
         self.dropout = nn.Dropout(.4)
@@ -28,23 +28,17 @@ class Judge(nn.Module):
     @classmethod
     def flatten(cls, x):
         """Flattens the input x to a 2d tensor"""
-        size = x.size()[1:]  # all dimensions except the batch dimension
+        size = x.size()[1:]
         num_features = 1
         for s in size:
             num_features *= s
         return x.view(-1, num_features)
 
     def forward(self, x):
-        """
-        Define a forward pass through the network.
-        
-        Note: Since we're inheriting from nn.Module, this will take care of the backward
-        pass and parameter update step when we use an optimizer from `torch.optim`.
-        """
-        # make each image 3d for compatibility with convolutional blocks
-        x = x.view(-1, 1, 28, 28)
+        """Forward pass"""
+        x = x.view(-1, 2, 28, 28)
         x = self.block1(x)
         x = self.block2(x)
-        x = self.flatten(x) # flatten output of convolutional section
+        x = self.flatten(x)
         x = self.dropout(self.hidden(x))
         return self.out(x)
