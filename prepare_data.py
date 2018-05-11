@@ -14,9 +14,9 @@ class SparseMNIST(datasets.MNIST):
         
     def __getitem__(self, ix):
         if self.train:
-            img, target = self.train_data[ix], self.train_labels[ix]
+            img, target = self.train_data[ix % len(self.train_data)], self.train_labels[ix % len(self.train_labels)]
         else:
-            img, target = self.test_data[ix], self.test_labels[ix]
+            img, target = self.test_data[ix % len(self.test_data)], self.test_labels[ix % len(self.test_labels)]
             
         img = img.unsqueeze(0).type(torch.float32) / 255
         sparse = img.clone()
@@ -54,10 +54,10 @@ class SparseMNIST(datasets.MNIST):
 def prepare_data(args):
     """Prepare SparseMNIST DataLoaders for training/test and optional validation"""
     # Datasets
-    train_set = SparseMNIST(args.pixels, args.batches, args.data_folder, train=True)
+    train_set = SparseMNIST(args.pixels, args.batches * args.batch_size, args.data_folder, train=True, download=True)
     if args.evaluate:
-        val_set = SparseMNIST(args.pixels, args.val_batches, args.data_folder, train=True)
-    test_set = SparseMNIST(args.pixels, args.test_batches, args.data_folder, train=False)
+        val_set = SparseMNIST(args.pixels, args.val_batches * args.eval_batch_size, args.data_folder, train=True)
+    test_set = SparseMNIST(args.pixels, args.test_batches * args.eval_batch_size, args.data_folder, train=False)
 
     # DataLoaders
     kwargs = {'num_workers': 1}

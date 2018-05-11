@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 from datetime import datetime
+import time
 import argparse
 
 import numpy as np
@@ -51,7 +52,10 @@ def main(args):
 
     # set up training metrics we want to track
     correct = 0
-    train_num = len(train_loader.sampler)
+    train_num = args.batches * args.batch_size
+
+    # timer
+    time0 = time.time()
 
     for ix, (sparse, img, label) in enumerate(train_loader): # iterate over training batches
         sparse, label = sparse.to(device), label.to(device) # get data, send to gpu if needed
@@ -65,12 +69,18 @@ def main(args):
         correct += pred.eq(label.view_as(pred)).sum().item() # add to running total of hits
 
         if ix % args.log_interval == 0: # maybe log current metrics to terminal
-            print('Train: [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tAccuracy:{:.2f}%'.format(
-                (ix + 1) * len(sparse), train_num, 100. * ix / len(train_loader), loss.item(),
-                100. * correct / ((ix + 1) * len(sparse))))
+            print('Train: [{}/{} ({:.0f}%)]\tLoss: {:.6f}\t\
+                Accuracy: {:.2f}%\tTime: {:0f} min, {:.2f} s'.format(
+                (ix + 1) * len(sparse), train_num,
+                100. * ix / len(train_loader),
+                loss.item(),
+                100. * correct / ((ix + 1) * len(sparse)),
+                (time.time() - time0) // 60,
+                (time.time() - time0) % 60))
 
-    print('Train Accuracy: {}/{} ({:.0f}%)\n'.format(
-        correct, train_num, 100. * correct / train_num))
+    print('Train Accuracy: {}/{} ({:.2f}%)\tTrain Time: {:0f} minutes, {:2f} seconds\n'.format(
+        correct, train_num, 100. * correct / train_num,
+        (time.time() - time0) // 60, (time.time() - time0) % 60))
 
     if args.evaluate:
         print('\n================== VALIDATION ==================')
@@ -79,7 +89,7 @@ def main(args):
         # set up validation metrics we want to track
         val_loss = 0.
         val_correct = 0
-        val_num = len(val_loader.sampler)
+        val_num = args.eval_batch_size * args.val_batches
 
         # disable autograd here (replaces volatile flag from v0.3.1 and earlier)
         with torch.no_grad():
@@ -95,7 +105,7 @@ def main(args):
         # update current evaluation metrics
         val_loss /= val_num
         val_acc = 100. * val_correct / val_num
-        print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+        print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
             val_loss, val_correct, val_num, val_acc))
 
         is_best = val_acc > best_val_acc
@@ -121,7 +131,7 @@ def main(args):
 
     test_loss = 0.
     test_correct = 0
-    test_num = len(test_loader.sampler)
+    test_num = args.eval_batch_size * args.test_batches
 
     # disable autograd here (replaces volatile flag from v0.3.1 and earlier)
     with torch.no_grad():
@@ -133,7 +143,7 @@ def main(args):
             test_correct += pred.eq(label.view_as(pred)).sum().item()
 
     test_loss /= test_num
-    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n'.format(
         test_loss, test_correct, test_num,
         100. * test_correct / test_num))
 
@@ -152,18 +162,18 @@ if __name__ == '__main__':
                         help='input batch size for evaluation (default: 1,000)')
     parser.add_argument('--batches', type=int, default=30000, metavar='N',
                         help='number of batches to train on (default: 30,000')
-    parser.add_argument('--val-batches', type=int, default=0, metavar='P',
-                        help='batches to use for validation (default: 0)')
-    parser.add_argument('--test-batches', type=float, default=400, metavar='P',
-                        help='percent of non-test data to use for training (default: 400)')
+    parser.add_argument('--val-batches', type=int, default=4, metavar='N',
+                        help='batches to use for validation (default: 4)')
+    parser.add_argument('--test-batches', type=int, default=800, metavar='N',
+                        help='percent of non-test data to use for training (default: 800)')
     parser.add_argument('--lr', type=float, default=1e-4, metavar='LR',
                         help='learning rate (default: 1e-4)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
     parser.add_argument('--seed', type=int, default=None, metavar='S',
                         help='random seed (default: None)')
-    parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='log training status every N batches (default: 10)')
+    parser.add_argument('--log-interval', type=int, default=1000, metavar='N',
+                        help='log training status every N batches (default: 1000)')
     parser.add_argument('--data-folder', type=str, default='./data/', metavar='PATH',
                         help='root path for folder containing MNIST data download \
                         (default: ./data/)')
