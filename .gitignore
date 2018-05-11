@@ -1,5 +1,4 @@
-*__pycache__*
 dev/
-data/*.npy
-data/*kaggle*
+data/
 checkpoint/
+*__pycache__*
