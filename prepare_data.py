@@ -7,7 +7,7 @@ from torchvision import datasets, transforms
 
 class SparseMNIST(datasets.MNIST):
     def __init__(self, pixels, n, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super.__init__(*args, **kwargs)
         self.pixels = pixels
         self._n = n
         self._generator = torch.default_generator

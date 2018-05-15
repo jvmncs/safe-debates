@@ -2,6 +2,33 @@ import os
 import shutil
 import torch
 
+class BatchDict(dict):
+    """A dict-like that takes care of batching with key-dependent defaults"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._get = super(self.__class__, self).__getitem__
+        self._set = super(self.__class__, self).__setitem__
+
+    def __getitem__(self, keys):
+        values = [self._get(self._to_tuple(key)).unsqueeze(0) for key in keys]
+        return torch.cat(values, dim=0)
+
+    def __setitem__(self, keys, values):
+        for key, value in zip(keys, values):
+            self._set(self._to_tuple(key), value)
+
+    def __missing__(self, key):
+        """
+        Default to 1d FloatTensor of zeros with similar length.
+        """
+        return torch.zeros(len(key), dtype=torch.float)
+
+    @classmethod
+    def _to_tuple(cls, key):
+        """Convert n-d tensor to flattened tuple for key storage"""
+        return tuple(key.view(-1).tolist())
+
+
 def mkdir_p(path):
     '''make dir if not exist'''
     try:

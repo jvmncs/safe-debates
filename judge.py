@@ -9,7 +9,7 @@ class Judge(nn.Module):
     Reproduced, not optimized.  Only change is number of channels in input.
     """
     def __init__(self):
-        super().__init__()
+        super.__init__()
         self.block1 = self.conv_block(2, 32)
         self.block2 = self.conv_block(32, 64)
         self.hidden = nn.Linear(4 * 4 * 64, 1024)
