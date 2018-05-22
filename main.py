@@ -20,7 +20,7 @@ def main(args):
         np.random.seed(args.seed)
 
     # cuda
-    args.use_cuda = not args.no_cuda and torch.cuda.is_available()
+    args.use_cuda = args.cuda and torch.cuda.is_available()
     args.device = torch.device("cuda" if args.use_cuda else "cpu")
 
     # data
@@ -80,26 +80,30 @@ if __name__=='__main__':
                         help='playout games without precommit')
     parser.add_argument('--honest-first', action='store_true', default=False,
                         help='honest player plays first')
-    parser.add_argument('--batch-size', type=int, default=128, metavar='N',
-                        help='simlutaneous games to play (default: 1000)')
-    parser.add_argument('--no-cuda', action='store_true', default=False,
-                        help='disables CUDA training')
+    parser.add_argument('--batch-size', type=int, default=10000, metavar='N',
+                        help='simlutaneous games to play (default: 10000)')
+    parser.add_argument('--cuda', action='store_true', default=False,
+                        help='enables CUDA training')
     parser.add_argument('--seed', type=int, default=None, metavar='S',
                         help='random seed (default: None)')
     parser.add_argument('--data-folder', type=str, default='./data/', metavar='PATH',
                         help='root path for folder containing MNIST data download \
                         (default: ./data/)')
+    parser.add_argument('--profile', , action='store_true', default=False,
+                        help='generate cProfile stats file')
     args = parser.parse_args()
 
     args.precommit = not args.no_precommit
     args.liar_first = not args.honest_first
-    fname = './profiles/profile.{}px.{}rnds.{}roll.{}bs.{}.txt'.format(
-        args.pixels, args.rounds, args.rollouts, args.batch_size,
-        'cuda' if not args.no_cuda else 'nocuda')
-    pr = cProfile.Profile()
-    pr.enable()
+    if args.profile:
+        fname = './profiles/profile.{}px.{}rnds.{}roll.{}bs.{}.txt'.format(
+            args.pixels, args.rounds, args.rollouts, args.batch_size,
+            'cuda' if args.cuda else 'nocuda')
+        pr = cProfile.Profile()
+        pr.enable()
     main(args)
-    pr.disable()
-    with open(fname, 'w') as f:
-        stats = pstats.Stats(pr, stream=f).sort_stats('cumulative')
-        stats.print_stats()
+    if args.profile:
+        pr.disable()
+        with open(fname, 'w') as f:
+            stats = pstats.Stats(pr, stream=f).sort_stats('cumulative')
+            stats.print_stats()
