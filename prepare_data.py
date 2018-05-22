@@ -7,7 +7,7 @@ from torchvision import datasets, transforms
 
 class SparseMNIST(datasets.MNIST):
     def __init__(self, pixels, n, *args, **kwargs):
-        super.__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.pixels = pixels
         self._n = n
         self._generator = torch.default_generator
@@ -36,7 +36,7 @@ class SparseMNIST(datasets.MNIST):
 
     def _get_mask(self, img):
         mask = torch.zeros_like(img, dtype=torch.uint8)
-        width = img.size()[1]
+        width = img.size(-1)
         pixels = self._get_pixels(img)
         
         for pixel in pixels:

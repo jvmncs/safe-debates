@@ -2,3 +2,4 @@ dev/
 data/
 checkpoint/
 *__pycache__*
+profiles/

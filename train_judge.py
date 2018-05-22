@@ -13,7 +13,7 @@ from torchvision import transforms
 
 
 from prepare_data import prepare_data
-from model import Judge
+from judge import Judge
 from utilities import save_checkpoint, mkdir_p
 
 
@@ -24,7 +24,10 @@ def main(args):
         np.random.seed(args.seed)
     if not os.path.isdir(args.checkpoint):
         mkdir_p(args.checkpoint)
-    checkpoint_file = args.checkpoint + str(datetime.now())[:-10]
+    if args.checkpoint_filename is None:
+        checkpoint_file = args.checkpoint + str(datetime.now())[:-10]
+    else:
+        checkpoint_file = args.checkpoint + args.checkpoint_filename
 
     # cuda
     args.use_cuda = not args.no_cuda and torch.cuda.is_available()
@@ -180,6 +183,8 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint', type=str, default='./checkpoint/', metavar='PATH',
                         help='root path for folder containing model checkpoints \
                         (default: ./checkpoint/)')
+    parser.add_argument('--checkpoint-filename', type=str, default=None, metavar='PATH',
+                        help='filename for model checkpoint (default: current datetime)')
     args = parser.parse_args()
 
     main(args)
