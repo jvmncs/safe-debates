@@ -2,6 +2,10 @@
 =====
 _A PyTorch implementation of AI safety via debate_
 
+This is currently not maintained and **very** unoptimized.  You can view the tracing files in `profiles/` to understand why -- it's essentially a poor choice of data structure (Python lookups are _awfully_ slow).  Also, there are quite a few TODOs throughout the code.
+
+If anything, this repo should be viewed as a set of design choices and abstractions for developing agents with debate.  If you use it, please reference it.
+
 Based on [`cle-mnist`](https://github.com/jvmancuso/cle-mnist).
 
 ### References
